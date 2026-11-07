@@ -1,11 +1,4 @@
-"""Tabular Q-learning for the supplied warehouse Gridworld environment.
 
-AI disclosure: This initial code was drafted with OpenAI ChatGPT (GPT-6),
-2026-11-04. Add the shared conversation/prompt URL before submission.
-
-IMPORTANT: This module operates on an adapter of the PROVIDED gridworld_domain.
-It does not implement or substitute a new environment.
-"""
 from __future__ import annotations
 
 import argparse

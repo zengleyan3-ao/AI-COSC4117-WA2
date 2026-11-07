@@ -1,6 +1,4 @@
-"""Visualize learned Q-Learning policies, state phases, and an example rollout.
-AI assistance: ChatGPT GPT-6, 2026-11-04; insert actual prompt share URL.
-"""
+
 import ast
 import csv
 import json

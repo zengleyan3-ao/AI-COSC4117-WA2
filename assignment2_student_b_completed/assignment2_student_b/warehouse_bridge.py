@@ -1,12 +1,4 @@
-"""Adapter around the instructor's WarehouseGridWorld; never a replacement environment.
 
-AI use: Created with ChatGPT GPT-6 on 2026-11-04. Insert conversation share
-URL here before submission: [ADD REAL SHARED PROMPT URL].
-
-Only changes: stochastic action sampling before delegating to the original step;
-independent RNG for motion; seeded resets with a FIXED station layout for fair
-cross-seed and cross-p comparisons. All rewards/obstacles/progress are untouched.
-"""
 import random
 from warehouse_gridworld_domain_random import WarehouseGridWorld, ACTIONS
 

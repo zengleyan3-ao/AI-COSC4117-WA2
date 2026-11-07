@@ -1,4 +1,4 @@
-"""Small reproducibility tests for Student B's Q-Learning code."""
+
 import random
 from q_learning import QAgent, Settings, train, evaluate
 from warehouse_bridge import create_env
