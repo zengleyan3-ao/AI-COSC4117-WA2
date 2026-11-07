@@ -105,7 +105,12 @@ def train(make_env, settings: Settings, seed: int, episodes: int,
     """Train by sampled transitions; agent never sees probability p."""
     rng = random.Random(seed)
     env = make_env(p=p, max_steps=max_steps)
-    agent = QAgent(tuple(env.actions), settings.alpha, settings.gamma)
+    agent = QAgent(
+    tuple(env.actions),
+    settings.alpha,
+    settings.gamma)
+
+    agent.initialize_states(env)
     history = []
     epsilon = settings.epsilon_start
     for ep in range(episodes):
@@ -209,6 +214,27 @@ def plot_success(rows: list[dict], path: Path, window: int = 100) -> None:
     fig.savefig(path, dpi=160)
     plt.close(fig)
 
+def initialize_states(self, env):
+
+    for row in range(env.world.size):
+        for col in range(env.world.size):
+
+            if not env.world.passable(row, col):
+                continue
+
+            for has_package, delivered in [
+                (0, 0),
+                (1, 0),
+                (1, 1)
+            ]:
+                state = (
+                    row,
+                    col,
+                    has_package,
+                    delivered
+                )
+
+                self.q[state] = [0.0] * len(self.actions)
 
 def summarize(rows: list[dict]) -> list[dict]:
     groups = defaultdict(list)
