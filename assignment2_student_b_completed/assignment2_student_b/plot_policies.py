@@ -12,7 +12,7 @@ import numpy as np
 from matplotlib.patches import Rectangle
 from warehouse_bridge import create_env
 
-OUT = Path('results_q_learning')
+OUT = Path(__file__).resolve().parent / 'results_q_learning'
 ARROW = {'up':'↑','down':'↓','left':'←','right':'→'}
 
 
@@ -31,7 +31,7 @@ def show_policy(config='A_fast_decay', seed=11):
     env = create_env(.8, 120)
 
     probabilities = (1.0, 0.9, 0.8)
-    phases = ((0, 0), (1, 0), (1, 1))
+    phases = ((0, 0, 120), (1, 0, 105), (1, 1, 90))
 
     fig, axs = plt.subplots(
         3, 3,
@@ -47,7 +47,7 @@ def show_policy(config='A_fast_decay', seed=11):
             ).read_text()
         )
 
-        for phase, (carrying, delivered) in enumerate(phases):
+        for phase, (carrying, delivered, remaining) in enumerate(phases):
 
             ax = axs[i, phase]
             background(ax, env)
@@ -59,7 +59,7 @@ def show_policy(config='A_fast_decay', seed=11):
                         continue
 
                     state = repr(
-                        (r, c, carrying, delivered)
+                        (r, c, carrying, delivered, remaining)
                     )
 
                     if state in policy:
@@ -73,12 +73,12 @@ def show_policy(config='A_fast_decay', seed=11):
 
             ax.set_title(
                 f'p={p:.2f} | ' +
-                ('Before pickup', 'Carrying', 'Delivered')[phase]
+                ('Before pickup', 'Carrying', 'Delivered')[phase] + f' | t={remaining}'
             )
 
     fig.suptitle(
         f'Q-Learning Greedy Policy '
-        f'({config}, seed={seed})'
+        f'({config}, seed={seed})\nOnly visited states shown; fixed time slices'
     )
 
     fig.tight_layout()
@@ -89,7 +89,6 @@ def show_policy(config='A_fast_decay', seed=11):
     )
 
     plt.close(fig)
-
 
 def show_route(config='A_fast_decay',seed=11):
     env=create_env(.8,120)

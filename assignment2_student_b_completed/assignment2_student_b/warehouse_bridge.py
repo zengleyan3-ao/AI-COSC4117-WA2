@@ -32,7 +32,8 @@ class StochasticWarehouseAdapter:
         # Reseeding motion does not regenerate pickup/packing/dock positions.
         self.motion_rng.seed(seed)
         self.successful = False
-        return self.world.reset()
+        state = self.world.reset()
+        return (*state, self.world.max_steps - self.world.steps)
 
     def step(self, action: str):
         if action not in self.actions:
@@ -48,7 +49,8 @@ class StochasticWarehouseAdapter:
         self.successful = self.successful or result.info.get('event') == 'return_to_dock'
         terminated = self.successful
         truncated = result.done and not terminated
-        return result.state, float(result.reward), terminated, truncated
+        state = (*result.state, self.world.max_steps - self.world.steps)
+        return state, float(result.reward), terminated, truncated
 
 
 def create_env(p: float, max_steps: int):

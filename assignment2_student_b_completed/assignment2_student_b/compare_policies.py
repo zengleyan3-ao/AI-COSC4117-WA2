@@ -1,3 +1,4 @@
+
 """Compare learned Q-Learning policies under different motion probabilities."""
 
 import argparse
@@ -38,6 +39,8 @@ def main():
     )
 
     args = parser.parse_args()
+    if args.min_visits < 1:
+        parser.error("--min-visits must be positive")
 
     # Load learned policies.
     policy_high = json.loads(
@@ -124,3 +127,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

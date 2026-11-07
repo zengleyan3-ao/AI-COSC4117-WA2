@@ -1,7 +1,7 @@
 # COSC-4117EL Assignment 2 — Student B (Q-Learning)
 
 This is an executable Q-Learning package using the **professor-provided** `warehouse_gridworld_domain_random.py`, with one documented stochastic adapter. It does not use a replacement simulator.  
-**AI use disclosure:** ChatGPT GPT-6 helped create and test the code and report on 2026-11-06. 
+**AI use disclosure:** ChatGPT GPT-6 helped create and test the code and report on 2026-11-04. You must add the **actual shareable ChatGPT prompt/conversation URL** to code comments and report before submission, as required by the assignment. Do not invent a URL.
 
 ## Files
 
@@ -30,4 +30,6 @@ python compare_policies.py results_q_learning/policy_A_fast_decay_p1.00_seed11.j
 
 **Fixed warehouse positions (row, col):** pickup `(2,2)`, packing `(0,4)`, charging dock `(6,0)` from layout seed 42. Training seeds 11, 42, 99 affect motion/exploration, not the layout. All three task phases use the framework-provided four-field Markov state `(row,col,has_package,delivered)`. Action space retains invalid commands as in the original framework. The Q agent is never passed `p`; only the environment adapter is configured with it.
 
+## Team integration
 
+Student A: match layout seed 42, maximum 120 steps and stochastic `p` settings; preferably reuse this adapter for evaluation. Agree on exact evaluation seeds to obtain paired performance comparisons. The shared group report must add Value Iteration results and comparison, as well as the actual shared ChatGPT conversation URL and any required D2L programming-standard adjustments. ZIP the final **team** code, README and combined PDF as `COSC_4117EL_A2_G1.zip`; do not submit this Student B-only package in lieu of the combined assignment.
