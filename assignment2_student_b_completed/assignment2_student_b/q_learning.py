@@ -21,14 +21,13 @@ from typing import Any, Hashable, Protocol
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
 State = Hashable
 
 
 class WarehouseAdapter(Protocol):
     """Small bridge to the course-provided gridworld_domain.
 
-    reset(seed): return the Markov state (x, y, task_phase).
+    reset(seed): return (row, col, has_package, delivered, steps_remaining).
     step(action): return (next_state, reward, terminated, truncated).
     actions: sequence of allowable action names, same order across runs.
     successful: whether the LAST episode completed pickup, delivery, return.
@@ -74,7 +73,19 @@ class QAgent:
         self.actions, self.alpha, self.gamma = actions, alpha, gamma
         self.q: dict[State, list[float]] = defaultdict(lambda: [0.0] * len(actions))
         self.visits: dict[State, int] = defaultdict(int)
+        self.action_visits: dict[State, list[int]] = defaultdict(lambda: [0] * len(actions))
 
+    def initialize_states(self, env):
+        """Initialize valid (row, col, picked, delivered, remaining) states."""
+        for r in range(env.world.size):
+            for c in range(env.world.size):
+                if not env.world.passable(r, c):
+                    continue
+                for picked, delivered in ((0, 0), (1, 0), (1, 1)):
+                    for remaining in range(env.world.max_steps + 1):
+                        self.q[(r, c, picked, delivered, remaining)] = [0.0] * len(self.actions)
+
+    
     def greedy_index(self, state: State) -> int:
         values = self.q[state]
         return max(range(len(values)), key=lambda i: values[i])
@@ -91,13 +102,15 @@ class QAgent:
     def update(self, state: State, action_index: int, reward: float,
                next_state: State, done: bool) -> None:
         self.visits[state] += 1
+        self.action_visits[state][action_index] += 1
         future = 0.0 if done else max(self.q[next_state])
         target = reward + self.gamma * future
         old = self.q[state][action_index]
         self.q[state][action_index] = old + self.alpha * (target - old)
 
     def policy(self) -> dict[str, str]:
-        return {repr(s): self.actions[self.greedy_index(s)] for s in self.q}
+        return {repr(s): self.actions[self.greedy_index(s)] for s in self.q
+                if self.visits.get(s, 0) > 0}
 
 
 def train(make_env, settings: Settings, seed: int, episodes: int,
@@ -105,11 +118,7 @@ def train(make_env, settings: Settings, seed: int, episodes: int,
     """Train by sampled transitions; agent never sees probability p."""
     rng = random.Random(seed)
     env = make_env(p=p, max_steps=max_steps)
-    agent = QAgent(
-    tuple(env.actions),
-    settings.alpha,
-    settings.gamma)
-
+    agent = QAgent(tuple(env.actions), settings.alpha, settings.gamma)
     agent.initialize_states(env)
     history = []
     epsilon = settings.epsilon_start
@@ -214,27 +223,6 @@ def plot_success(rows: list[dict], path: Path, window: int = 100) -> None:
     fig.savefig(path, dpi=160)
     plt.close(fig)
 
-def initialize_states(self, env):
-
-    for row in range(env.world.size):
-        for col in range(env.world.size):
-
-            if not env.world.passable(row, col):
-                continue
-
-            for has_package, delivered in [
-                (0, 0),
-                (1, 0),
-                (1, 1)
-            ]:
-                state = (
-                    row,
-                    col,
-                    has_package,
-                    delivered
-                )
-
-                self.q[state] = [0.0] * len(self.actions)
 
 def summarize(rows: list[dict]) -> list[dict]:
     groups = defaultdict(list)
@@ -298,6 +286,8 @@ def main():
                 stem = f"{config.name}_p{p:.2f}_seed{seed}"
                 (args.output / f"policy_{stem}.json").write_text(
                     json.dumps(agent.policy(), indent=2), encoding="utf-8")
+                (args.output / f"action_visits_{stem}.json").write_text(
+                     json.dumps({repr(k): v for k, v in agent.action_visits.items()}, indent=2), encoding="utf-8")
                 (args.output / f"visits_{stem}.json").write_text(
                     json.dumps({repr(k): v for k,v in agent.visits.items()}, indent=2),
                     encoding="utf-8")
