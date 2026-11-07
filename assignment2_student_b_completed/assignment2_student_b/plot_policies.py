@@ -27,23 +27,68 @@ def background(ax, env):
     ax.set_aspect('equal')
 
 
-def show_policy(config='A_fast_decay',seed=11):
-    env=create_env(.8,120)
-    fig, axs=plt.subplots(2,3,figsize=(12,8))
-    for i,p in enumerate((1.,.8)):
-        policy=json.loads((OUT/f'policy_{config}_p{p:.2f}_seed{seed}.json').read_text())
-        for phase,(carrying,delivered) in enumerate(((0,0),(1,0),(1,1))):
-            ax=axs[i,phase];background(ax,env)
+def show_policy(config='A_fast_decay', seed=11):
+    env = create_env(.8, 120)
+
+    probabilities = (1.0, 0.9, 0.8)
+    phases = ((0, 0), (1, 0), (1, 1))
+
+    fig, axs = plt.subplots(
+        3, 3,
+        figsize=(12, 12)
+    )
+
+    for i, p in enumerate(probabilities):
+
+        policy = json.loads(
+            (
+                OUT /
+                f'policy_{config}_p{p:.2f}_seed{seed}.json'
+            ).read_text()
+        )
+
+        for phase, (carrying, delivered) in enumerate(phases):
+
+            ax = axs[i, phase]
+            background(ax, env)
+
             for r in range(10):
                 for c in range(10):
-                    if int(env.world.grid[r,c])==1:continue
-                    state=repr((r,c,carrying,delivered))
+
+                    if int(env.world.grid[r, c]) == 1:
+                        continue
+
+                    state = repr(
+                        (r, c, carrying, delivered)
+                    )
+
                     if state in policy:
-                        ax.text(c,r+.13,ARROW[policy[state]],ha='center',va='center',size=11)
-            ax.set_title(f'p={p:.1f} | '+('Before pickup','Carrying','Delivered')[phase])
-    fig.suptitle(f'Q-Learning greedy policy ({config}, training seed {seed})\nArrows shown only for states contained in the learned Q table',fontsize=12)
+                        ax.text(
+                            c, r + .13,
+                            ARROW[policy[state]],
+                            ha='center',
+                            va='center',
+                            size=11
+                        )
+
+            ax.set_title(
+                f'p={p:.2f} | ' +
+                ('Before pickup', 'Carrying', 'Delivered')[phase]
+            )
+
+    fig.suptitle(
+        f'Q-Learning Greedy Policy '
+        f'({config}, seed={seed})'
+    )
+
     fig.tight_layout()
-    fig.savefig(OUT/'policy_grid.png',dpi=160);plt.close(fig)
+
+    fig.savefig(
+        OUT / 'policy_grid.png',
+        dpi=160
+    )
+
+    plt.close(fig)
 
 
 def show_route(config='A_fast_decay',seed=11):
